@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: service-product-yanki
+
+  config:
+    import: "configserver:http://localhost:8888"

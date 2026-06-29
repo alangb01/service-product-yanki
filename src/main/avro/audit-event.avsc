@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "namespace": "pe.nom.charlygastelo.app.shared.avro.dto",
+  "name": "AuditEvent",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "eventType", "type": "string", "default": "AUDIT_EVENT" },
+    { "name": "occurredAt", "type": "string" },
+    { "name": "version", "type": "string", "default": "1.0" },
+    { "name": "source", "type": "string" },
+
+    { "name": "service", "type": "string" },
+    { "name": "action", "type": "string" },
+    { "name": "entity", "type": "string" },
+    { "name": "entityId", "type": "string" },
+    { "name": "customerId", "type": "string" },
+    { "name": "status", "type": "string" },
+    { "name": "description", "type": "string" }
+  ]
+}
