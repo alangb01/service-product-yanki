@@ -8,21 +8,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.DebitCardNotLinkedException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.InsufficientWalletBalanceException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.InvalidDebitCardException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.InvalidYankiPaymentException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletAlreadyExistsException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletInactiveException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletNotFoundException;
+import pe.nom.charlygastelo.app.yankiservice.domain.exception.*;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(WalletNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleWalletNotFound(WalletNotFoundException ex) {
-        log.warn("Wallet not found: {}", ex.getMessage());
+    @ExceptionHandler({
+            WalletNotFoundException.class,
+            WalletLinkNotFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleWalletNotFound(Exception ex) {
+        log.error("Wallet or link not found: {}", ex.getMessage());
 
         return build(HttpStatus.NOT_FOUND, ex.getMessage());
     }

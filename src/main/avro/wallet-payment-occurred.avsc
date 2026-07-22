@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "WalletPaymentOccurred",
+  "name": "WalletPaymentOccurredEvent",
   "namespace": "pe.nom.charlygastelo.app.shared.avro.dto",
   "fields": [
     { "name": "eventId", "type": "string" },
@@ -9,12 +9,15 @@
     { "name": "version", "type": "string" },
     { "name": "source", "type": "string" },
 
-    { "name": "transactionId", "type": "string" },
-    { "name": "customerId", "type": "string" },
-    { "name": "yankiId", "type": "string" },
 
-    { "name": "amount", "type": "string" },
-    { "name": "balance", "type": "string" },
-    { "name": "available", "type": "string" }
+    { "name": "correlationId", "type": "string" },
+
+    { "name": "sourceWalletId", "type": "string" },
+    { "name": "targetWalletId", "type": "string" },
+
+    { "name": "sourceDebitCardId", "type": "string" },
+    { "name": "targetDebitCardId", "type": "string" },
+
+    { "name": "amount", "type": "double" }
   ]
 }

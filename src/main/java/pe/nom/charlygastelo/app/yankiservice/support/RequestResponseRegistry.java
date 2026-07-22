@@ -3,10 +3,12 @@ package pe.nom.charlygastelo.app.yankiservice.support;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleEmitter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 @Slf4j
 public class RequestResponseRegistry<T> {
 

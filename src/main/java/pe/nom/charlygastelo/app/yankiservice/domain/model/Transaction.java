@@ -7,16 +7,12 @@ import java.time.Instant;
 
 public record Transaction(
         String id,
-        String customerId,
-        String sourceProductType,
-        String targetProductType,
-        String sourceProductId,
-        String targetProductId,
+        String sourceWalletId,
+        String targetWalletId,
         TransactionType type,
         BigDecimal amount,
         BigDecimal commission,
-        String description,
-        Instant timestamp
+        String description
 ) {
 
     private void validateAmount() {

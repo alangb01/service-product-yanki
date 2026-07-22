@@ -12,18 +12,14 @@ public class WalletLink {
 
     @Id
     private String id;
-
     private String walletId;
     private String debitCardId;
-    private String accountId;
-
     private Instant linkedAt;
 
     public WalletLink unlinkDebitCard() {
         return WalletLink.builder()
                 .id(id)
                 .walletId(walletId)
-                .accountId(accountId)
                 .linkedAt(linkedAt)
                 .build();
     }

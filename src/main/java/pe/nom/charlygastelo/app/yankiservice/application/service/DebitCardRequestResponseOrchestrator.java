@@ -61,8 +61,6 @@ public class DebitCardRequestResponseOrchestrator implements DebitCardRepository
 
         DebitCard debitCard = new DebitCard(
                 event.getDebitCard().getId().toString(),
-                event.getDebitCard().getCustomerId().toString(),
-                event.getDebitCard().getCustomerId().toString(),
                 null,
                 event.getDebitCard().getType().toString(),
                 event.getDebitCard().getStatus().toString()

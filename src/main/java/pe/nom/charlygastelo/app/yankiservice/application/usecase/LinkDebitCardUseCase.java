@@ -59,7 +59,6 @@ public class LinkDebitCardUseCase {
         return WalletLink.builder()
                 .walletId(wallet.id())
                 .debitCardId(debitCard.id())
-                .accountId(debitCard.accountId())
                 .build();
     }
 

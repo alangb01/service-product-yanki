@@ -16,7 +16,6 @@ public class GetWalletBalanceUseCase {
 
     private final WalletRepositoryPort walletRepository;
     private final WalletLinkRepositoryPort walletLinkRepository;
-    private final DebitCardRepositoryPort debitCardRepository;
     private final AccountRepositoryPort accountRepository;
 
     public Single<WalletBalance> execute(String walletId) {
@@ -25,21 +24,15 @@ public class GetWalletBalanceUseCase {
 
         return walletRepository.findById(walletId)
             .switchIfEmpty(Single.error(
-                    new WalletNotFoundException("Wallet not found: " + walletId)
+                new WalletNotFoundException("Wallet not found: " + walletId)
             ))
             .flatMap(wallet ->
                 walletLinkRepository.findByWalletId(wallet.id())
                     .switchIfEmpty(Single.error(
-                            new WalletLinkNotFoundException("Wallet link not found: " + wallet.id())
+                        new WalletLinkNotFoundException("Wallet link not found: " + wallet.id())
                     ))
                     .flatMap(link ->
-                        debitCardRepository.getById(link.getDebitCardId())
-                            .flatMap(card ->
-                                accountRepository.getById(link.getAccountId())
-                                    .map(account ->
-                                        new WalletBalance(account, card, link, wallet)
-                                    )
-                            )
+                        Single.just(new WalletBalance(null,null,link, wallet))
                     )
             );
     }

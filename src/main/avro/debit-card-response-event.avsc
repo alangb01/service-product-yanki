@@ -28,8 +28,6 @@
           "name": "DebitCard",
           "fields": [
             { "name": "id", "type": "string" },
-            { "name": "accountId", "type": "string" },
-            { "name": "customerId", "type": "string" },
             { "name": "type", "type": "string" },
             { "name": "status", "type": "string" }
           ]

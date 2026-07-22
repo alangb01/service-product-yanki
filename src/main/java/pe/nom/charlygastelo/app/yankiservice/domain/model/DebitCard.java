@@ -2,8 +2,6 @@ package pe.nom.charlygastelo.app.yankiservice.domain.model;
 
 public record DebitCard(
         String id,
-        String customerId,
-        String accountId,
         String cardNumber,
         String type,
         String status
