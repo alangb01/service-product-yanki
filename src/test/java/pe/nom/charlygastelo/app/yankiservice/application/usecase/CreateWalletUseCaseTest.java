@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletAlreadyExistsException;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletEventProducerPort;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletRepositoryPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.event.WalletEventProducerPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.WalletRepositoryPort;
 
 @RequiredArgsConstructor
 @Slf4j

@@ -13,7 +13,6 @@
     { "name": "phone", "type": "string" },
     { "name": "email", "type": "string" },
     { "name": "debitCardId", "type": "string" },
-    { "name": "balance", "type": "double" },
     { "name": "status", "type": "string" }
   ]
 }

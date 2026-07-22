@@ -23,6 +23,8 @@
         <confluent.version>7.6.1</confluent.version>
         <avro.version>1.11.3</avro.version>
         <project.deploy.directory>C:/micro/proyecto/SERVICIOS/product</project.deploy.directory>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.login>squ_23a9da1d82b12a9825efe280ec729cc410bbe802</sonar.login>
     </properties>
 
     <repositories>
@@ -106,6 +108,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.jsonwebtoken</groupId>
+                    <artifactId>jjwt</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -133,6 +141,7 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
+
         <!-- Avro -->
         <dependency>
             <groupId>org.apache.avro</groupId>
@@ -220,7 +229,12 @@
 
     <build>
         <plugins>
-
+            <!-- SONAR -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.10.0.2594</version>
+            </plugin>
             <!-- Avro generator -->
             <plugin>
                 <groupId>org.apache.avro</groupId>
@@ -239,28 +253,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Add generated Avro sources -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.5.0</version>
-                <executions>
-                    <execution>
-                        <id>add-avro-sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/avro</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
 
             <!-- Add generated Avro sources -->
             <plugin>

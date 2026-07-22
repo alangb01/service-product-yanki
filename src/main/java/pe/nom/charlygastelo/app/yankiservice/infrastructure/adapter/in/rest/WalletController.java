@@ -1,34 +1,27 @@
 package pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest;
 
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.CreateWalletUseCase;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.DeleteWalletUseCase;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.GetWalletBalanceUseCase;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.GetWalletUseCase;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.LinkDebitCardUseCase;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.ListWalletsUseCase;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.SendYankiPaymentUseCase;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.UnlinkDebitCardUseCase;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.UpdateWalletUseCase;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
+import pe.nom.charlygastelo.app.yankiservice.application.command.WalletLinkCommand;
+import pe.nom.charlygastelo.app.yankiservice.application.command.WalletPaymentCommand;
+import pe.nom.charlygastelo.app.yankiservice.application.usecase.*;
+import pe.nom.charlygastelo.app.yankiservice.application.usecase.transaction.PaymentUseCase;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
-import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.CreateWalletRequest;
-import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.LinkDebitCardRequest;
-import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.SendYankiPaymentRequest;
-import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.UpdateWalletRequest;
-import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.WalletBalanceResponse;
-import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.WalletResponse;
+import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.*;
 import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.mapper.WalletRestMapper;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/wallets")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class WalletController {
 
@@ -39,7 +32,7 @@ public class WalletController {
     private final DeleteWalletUseCase deleteWalletUseCase;
     private final LinkDebitCardUseCase linkDebitCardUseCase;
     private final UnlinkDebitCardUseCase unlinkDebitCardUseCase;
-    private final SendYankiPaymentUseCase sendYankiPaymentUseCase;
+    private final PaymentUseCase paymentUseCase;
     private final GetWalletBalanceUseCase getWalletBalanceUseCase;
     private final WalletRestMapper mapper;
 
@@ -112,9 +105,10 @@ public class WalletController {
             @PathVariable String walletId,
             @Valid @RequestBody LinkDebitCardRequest request) {
 
-        return linkDebitCardUseCase.execute(walletId, request.cardId())
-                .map(wallet ->
-                        ResponseEntity.ok(mapper.toResponse(wallet))
+        WalletLinkCommand walletLinkCommand = new WalletLinkCommand(walletId, request.cardId());
+        return linkDebitCardUseCase.execute(walletLinkCommand)
+                .map(result ->
+                        ResponseEntity.ok(mapper.toResponse(result.wallet()))
                 );
     }
 
@@ -122,22 +116,24 @@ public class WalletController {
     public Single<ResponseEntity<WalletResponse>> unlinkDebitCard(
             @PathVariable String walletId) {
 
+
         return unlinkDebitCardUseCase.execute(walletId)
                 .map(wallet ->
-                        ResponseEntity.ok(mapper.toResponse(wallet))
+                        ResponseEntity.ok().build()
                 );
     }
 
     @PostMapping("/payments/send")
     public Completable sendPayment(
-            @Valid @RequestBody SendYankiPaymentRequest request) {
+            @Valid @RequestBody WalletPaymentRequest request) {
 
-        return sendYankiPaymentUseCase.execute(
+        WalletPaymentCommand paymentCmd = new WalletPaymentCommand(
                 request.sourcePhone(),
                 request.targetPhone(),
                 request.amount(),
                 request.description()
-        );
+            );
+        return paymentUseCase.execute(paymentCmd);
     }
 
     @GetMapping("/{id}/balance")
@@ -146,7 +142,7 @@ public class WalletController {
 
         return getWalletBalanceUseCase.execute(id)
                 .map(wallet ->
-                        ResponseEntity.ok(mapper.toBalanceResponse(wallet))
+                        ResponseEntity.ok(mapper.toBalanceResponse(wallet.wallet(), wallet.account()))
                 );
     }
 }

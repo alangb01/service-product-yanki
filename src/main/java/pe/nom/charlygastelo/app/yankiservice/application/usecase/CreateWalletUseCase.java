@@ -1,13 +1,15 @@
 package pe.nom.charlygastelo.app.yankiservice.application.usecase;
 
+import org.springframework.stereotype.Component;
 import io.reactivex.rxjava3.core.Single;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletAlreadyExistsException;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletEventProducerPort;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletRepositoryPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.event.WalletEventProducerPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.WalletRepositoryPort;
 
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class CreateWalletUseCase {

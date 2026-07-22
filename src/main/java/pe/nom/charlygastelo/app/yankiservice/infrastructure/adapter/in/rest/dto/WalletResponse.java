@@ -17,15 +17,11 @@ public record WalletResponse(
 
         String email,
 
-        String debitCardId,
-
-        BigDecimal balance,
-
         String status,
 
-        LocalDateTime createdAt,
+        String createdAt,
 
-        LocalDateTime updatedAt
+        String updatedAt
 
 ) {
 }

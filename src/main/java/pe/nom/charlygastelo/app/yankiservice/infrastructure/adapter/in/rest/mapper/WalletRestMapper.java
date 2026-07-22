@@ -1,10 +1,11 @@
 package pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.mapper;
 
-import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
-
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Component;
-
+import pe.nom.charlygastelo.app.yankiservice.domain.model.Account;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.DocumentType;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.WalletStatus;
@@ -17,7 +18,7 @@ import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.
 public class WalletRestMapper {
 
     public Wallet toDomain(CreateWalletRequest request) {
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
 
         return new Wallet(
                 null,
@@ -26,11 +27,9 @@ public class WalletRestMapper {
                 request.phone(),
                 request.imei(),
                 request.email(),
-                null,
-                BigDecimal.ZERO,
                 WalletStatus.ACTIVE,
                 now,
-                now
+                null
         );
     }
 
@@ -42,11 +41,9 @@ public class WalletRestMapper {
                 existing.phone(),
                 existing.imei(),
                 request.email(),
-                existing.debitCardId(),
-                existing.balance(),
                 WalletStatus.valueOf(request.status()),
                 existing.createdAt(),
-                LocalDateTime.now()
+                Instant.now()
         );
     }
 
@@ -58,19 +55,25 @@ public class WalletRestMapper {
                 wallet.phone(),
                 wallet.imei(),
                 wallet.email(),
-                wallet.debitCardId(),
-                wallet.balance(),
                 wallet.status().name(),
-                wallet.createdAt(),
-                wallet.updatedAt()
+                formatInstant(wallet.createdAt()),
+                formatInstant(wallet.updatedAt())
         );
     }
 
-    public WalletBalanceResponse toBalanceResponse(Wallet wallet) {
+    public WalletBalanceResponse toBalanceResponse(Wallet wallet, Account account) {
         return new WalletBalanceResponse(
                 wallet.id(),
                 wallet.phone(),
-                wallet.balance()
+                account.balance()
         );
+    }
+
+    public String formatInstant(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
+        LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneId.of("America/Lima"));
+        return ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }

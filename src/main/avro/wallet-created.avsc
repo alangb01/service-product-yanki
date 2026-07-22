@@ -15,7 +15,6 @@
     { "name": "phone", "type": "string" },
     { "name": "imei", "type": "string" },
     { "name": "email", "type": "string" },
-    { "name": "balance", "type": "double" },
     { "name": "status", "type": "string" }
   ]
 }

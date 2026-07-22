@@ -1,24 +1,8 @@
 package pe.nom.charlygastelo.app.yankiservice.application.usecase;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.UUID;
+/*
 
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Single;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.InsufficientWalletBalanceException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.InvalidYankiPaymentException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletInactiveException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletNotFoundException;
-import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
-import pe.nom.charlygastelo.app.yankiservice.domain.model.YankiTransaction;
-import pe.nom.charlygastelo.app.yankiservice.domain.model.YankiTransactionType;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.MovementEventPort;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletEventProducerPort;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletRepositoryPort;
-
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class SendYankiPaymentUseCase {
@@ -125,17 +109,18 @@ public class SendYankiPaymentUseCase {
         Wallet creditedTarget =
                 target.withBalance(target.balance().add(amount));
 
-        YankiTransaction transaction =
-                new YankiTransaction(
+        Transaction transaction =
+                new Transaction(
                         UUID.randomUUID().toString(),
                         source.id(),
                         target.id(),
                         source.phone(),
                         target.phone(),
-                        YankiTransactionType.SEND_PAYMENT,
+                        TransactionType.YANKI_PAYMENT,
                         amount,
+                        BigDecimal.ZERO,
                         description == null ? "" : description,
-                        LocalDateTime.now()
+                        Instant.now()
                 );
 
         return repository.save(debitedSource)
@@ -186,7 +171,7 @@ public class SendYankiPaymentUseCase {
     private record PaymentResult(
             Wallet source,
             Wallet target,
-            YankiTransaction transaction
+            Transaction transaction
     ) {
     }
-}
+}*/

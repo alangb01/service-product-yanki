@@ -1,62 +1,81 @@
 package pe.nom.charlygastelo.app.yankiservice.application.usecase;
 
+import org.springframework.stereotype.Component;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.InvalidDebitCardException;
+import pe.nom.charlygastelo.app.yankiservice.application.command.WalletLinkCommand;
+import pe.nom.charlygastelo.app.yankiservice.domain.exception.BusinessException;
 import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletNotFoundException;
-import pe.nom.charlygastelo.app.yankiservice.domain.model.Card;
+import pe.nom.charlygastelo.app.yankiservice.domain.model.DebitCard;
+import pe.nom.charlygastelo.app.yankiservice.domain.model.LinkResult;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.CardEventPort;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletEventProducerPort;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletRepositoryPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.model.WalletLink;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.event.WalletLinkEventProducerPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.DebitCardRepositoryPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.WalletLinkRepositoryPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.WalletRepositoryPort;
 
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class LinkDebitCardUseCase {
 
-    private final WalletRepositoryPort repository;
-    private final CardEventPort cardEventPort;
-    private final WalletEventProducerPort producer;
+    private final WalletRepositoryPort walletRepository;
+    private final WalletLinkRepositoryPort walletLinkRepository;
+    private final WalletLinkEventProducerPort walletLinkedEventProducer;
+    private final DebitCardRepositoryPort debitCardEventRequest;
 
-    public Single<Wallet> execute(String walletId, String cardId) {
-        log.info("Linking debit card to wallet. walletId={}, cardId={}", walletId, cardId);
+    public Single<LinkResult> execute(WalletLinkCommand cmd) {
+        log.info("Linking debit card to wallet={} debitCard={}",
+                cmd.walletId(), cmd.debitCardId());
 
-        return repository.findById(walletId)
-                .switchIfEmpty(Single.error(
-                        new WalletNotFoundException("Wallet not found: " + walletId)
-                ))
-                .flatMap(wallet ->
-                        cardEventPort.getById(cardId)
-                                .flatMap(card -> validateDebitCard(card)
-                                        .andThen(Single.just(wallet.linkDebitCard(card.id()))))
-                )
-                .flatMap(repository::save)
-                .flatMap(saved ->
-                        producer.publishWalletLinkedDebitCard(saved)
-                                .andThen(Single.just(saved))
-                )
-                .doOnSuccess(saved ->
-                        log.info("Debit card linked successfully. walletId={}, cardId={}",
-                                saved.id(), saved.debitCardId()))
-                .doOnError(error ->
-                        log.error("Error linking debit card. walletId={}, cardId={}, reason={}",
-                                walletId, cardId, error.getMessage(), error));
+        return walletRepository.findById(cmd.walletId())
+            .switchIfEmpty(Single.error(
+                new WalletNotFoundException("Wallet not found: " + cmd.walletId())
+            ))
+            .flatMap(wallet ->
+                debitCardEventRequest.getById(cmd.debitCardId())
+                    .flatMap(debitCard ->
+                        validateDebitCard(debitCard)
+                            .andThen(Single.just(createLink(debitCard, wallet)))
+                            .flatMap(link ->
+                                walletLinkRepository.save(link)
+                                    .map(saved -> new LinkResult(saved, wallet)) // ← contexto interno
+                            )
+                    )
+            )
+            .flatMap(ctx ->
+                walletLinkedEventProducer.publishWalletLinkedDebitCard(
+                    ctx.saved(),   // WalletLink
+                    ctx.wallet()   // Wallet
+                ).andThen(Single.just(ctx))
+            );
     }
 
-    private io.reactivex.rxjava3.core.Completable validateDebitCard(Card card) {
+
+    private WalletLink createLink(DebitCard debitCard, Wallet wallet) {
+        return WalletLink.builder()
+                .walletId(wallet.id())
+                .debitCardId(debitCard.id())
+                .accountId(debitCard.accountId())
+                .build();
+    }
+
+    private Completable validateDebitCard(DebitCard card) {
         if (!card.isDebit()) {
-            return io.reactivex.rxjava3.core.Completable.error(
-                    new InvalidDebitCardException("Card is not a debit card")
+            return Completable.error(
+                    new BusinessException("Card is not a debit card")
             );
         }
 
         if (!card.isActive()) {
-            return io.reactivex.rxjava3.core.Completable.error(
-                    new InvalidDebitCardException("Card is inactive")
+            return Completable.error(
+                    new BusinessException("Card is inactive")
             );
         }
 
-        return io.reactivex.rxjava3.core.Completable.complete();
+        return Completable.complete();
     }
 }

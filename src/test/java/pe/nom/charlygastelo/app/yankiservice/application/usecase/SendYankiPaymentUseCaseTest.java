@@ -7,7 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pe.nom.charlygastelo.app.yankiservice.domain.exception.InsufficientWalletBalanceException;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.*;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.*;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.event.WalletEventProducerPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.WalletRepositoryPort;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

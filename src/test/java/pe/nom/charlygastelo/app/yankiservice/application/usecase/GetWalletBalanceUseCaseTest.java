@@ -7,7 +7,7 @@ import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletNotFoundExce
 import pe.nom.charlygastelo.app.yankiservice.domain.model.DocumentType;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.WalletStatus;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.WalletRepositoryPort;
+import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.WalletRepositoryPort;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

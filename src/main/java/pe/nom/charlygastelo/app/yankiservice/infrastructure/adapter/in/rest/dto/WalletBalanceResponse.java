@@ -8,7 +8,7 @@ public record WalletBalanceResponse(
 
         String phone,
 
-        BigDecimal balance
+        String balance
 
 ) {
 }
