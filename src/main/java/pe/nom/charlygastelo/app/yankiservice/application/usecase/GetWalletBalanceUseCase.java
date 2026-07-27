@@ -16,7 +16,6 @@ public class GetWalletBalanceUseCase {
 
     private final WalletRepositoryPort walletRepository;
     private final WalletLinkRepositoryPort walletLinkRepository;
-    private final AccountRepositoryPort accountRepository;
 
     public Single<WalletBalance> execute(String walletId) {
 

@@ -2,6 +2,8 @@ package pe.nom.charlygastelo.app.yankiservice.application.service;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import io.reactivex.rxjava3.core.Maybe;
 import org.springframework.stereotype.Service;
 import io.reactivex.rxjava3.core.Single;
 import jakarta.annotation.PostConstruct;
@@ -20,7 +22,7 @@ import pe.nom.charlygastelo.app.yankiservice.support.RequestResponseRegistry;
 @RequiredArgsConstructor
 public class DebitCardRequestResponseOrchestrator implements DebitCardRepositoryPort {
 
-    private static final long TIMEOUT_SECONDS = 5L;
+    private static final long TIMEOUT_SECONDS = 2L;
 
     private final DebitCardRequestProducerPort producer;
     private final DebitCardKafkaConsumer consumer;
@@ -33,22 +35,22 @@ public class DebitCardRequestResponseOrchestrator implements DebitCardRepository
     }
 
     @Override
-    public Single<DebitCard> getById(String debitCardId) {
-        return Single.defer(() -> {
+    public Maybe<DebitCard> findById(String debitCardId) {
+        return Maybe.defer(() -> {
             String correlationId = UUID.randomUUID().toString();
 
-            Single<DebitCard> response = registry.register(correlationId);
+            Maybe<DebitCard> response = registry.register(correlationId);
 
             return producer.publishDebitCardRequest(correlationId, debitCardId)
                     .andThen(response)
                     .timeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
                     .onErrorResumeNext(error -> {
                         if (error instanceof java.util.concurrent.TimeoutException) {
-                            return Single.error(new ServiceTimeoutException(
+                            return Maybe.error(new ServiceTimeoutException(
                                     "Timeout requesting debit card: " + debitCardId
                             ));
                         }
-                        return Single.error(error);
+                        return Maybe.error(error);
                     });
         });
     }

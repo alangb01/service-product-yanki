@@ -26,10 +26,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             WalletAlreadyExistsException.class,
-            InvalidDebitCardException.class,
-            InvalidYankiPaymentException.class,
+            WalletLinkAlreadyExistException.class,
             DebitCardNotLinkedException.class,
-            InsufficientWalletBalanceException.class,
+            DebitCardNotFoundException.class,
             WalletInactiveException.class
     })
     public ResponseEntity<ErrorResponse> handleBusinessException(RuntimeException ex) {

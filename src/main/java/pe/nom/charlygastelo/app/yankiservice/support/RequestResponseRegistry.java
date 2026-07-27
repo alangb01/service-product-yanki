@@ -1,8 +1,11 @@
 package pe.nom.charlygastelo.app.yankiservice.support;
 
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.MaybeEmitter;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleEmitter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -12,25 +15,40 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class RequestResponseRegistry<T> {
 
-    private final Map<String, SingleEmitter<T>> pending = new ConcurrentHashMap<>();
+    private final Map<String, MaybeEmitter<T>> pending = new ConcurrentHashMap<>();
 
-    public Single<T> register(String correlationId) {
-        return Single.create(emitter -> {
-            SingleEmitter<T> existing = pending.putIfAbsent(correlationId, emitter);
 
-            if (existing != null) {
-                emitter.onError(new IllegalStateException(
-                        "CorrelationId already registered: " + correlationId
-                ));
-                return;
-            }
+    public Maybe<T> register(String correlationId) {
+        return Maybe.<T>create(emitter -> {
 
-            emitter.setCancellable(() -> pending.remove(correlationId));
-        });
+                    MaybeEmitter<T> existing = pending.putIfAbsent(correlationId, emitter);
+
+                    if (existing != null) {
+                        emitter.onError(new IllegalStateException(
+                                "CorrelationId already registered: " + correlationId
+                        ));
+                        return;
+                    }
+
+                    // Limpieza si el cliente cancela
+                    emitter.setCancellable(() -> {
+                        pending.remove(correlationId);
+                        log.warn("[REGISTRY] Cancelled correlationId={}", correlationId);
+                    });
+
+                })
+                // Timeout real
+                .timeout(2, java.util.concurrent.TimeUnit.SECONDS)
+                // Limpieza en timeout o error
+                .doOnError(error -> {
+                    pending.remove(correlationId);
+                    log.error("[REGISTRY] Timeout or error for correlationId={}", correlationId);
+                });
     }
 
+
     public void complete(String correlationId, T response) {
-        SingleEmitter<T> emitter = pending.remove(correlationId);
+        MaybeEmitter<T> emitter = pending.remove(correlationId);
 
         if (emitter == null) {
             log.warn("[REGISTRY] No emitter found for correlationId={}", correlationId);
@@ -43,7 +61,7 @@ public class RequestResponseRegistry<T> {
     }
 
     public void fail(String correlationId, Throwable error) {
-        SingleEmitter<T> emitter = pending.remove(correlationId);
+        MaybeEmitter<T> emitter = pending.remove(correlationId);
 
         if (emitter == null) {
             log.warn("[REGISTRY] No emitter found for correlationId={}", correlationId);

@@ -1,5 +1,6 @@
 package pe.nom.charlygastelo.app.yankiservice.application.usecase;
 
+import io.reactivex.rxjava3.core.Completable;
 import org.springframework.stereotype.Component;
 import io.reactivex.rxjava3.core.Single;
 import lombok.RequiredArgsConstructor;
@@ -38,21 +39,21 @@ public class CreateWalletUseCase {
                                 wallet.phone(), error.getMessage(), error));
     }
 
-    private io.reactivex.rxjava3.core.Completable validateUniquePhone(String phone) {
+    private Completable validateUniquePhone(String phone) {
         return repository.findByPhone(phone)
-                .flatMapCompletable(existing ->
-                        io.reactivex.rxjava3.core.Completable.error(
-                                new WalletAlreadyExistsException(
-                                        "Wallet already exists with phone: " + phone
-                                )
-                        )
-                );
+            .flatMapCompletable(existing ->
+                Completable.error(
+                    new WalletAlreadyExistsException(
+                            "Wallet already exists with phone: " + phone
+                    )
+                )
+            );
     }
 
-    private io.reactivex.rxjava3.core.Completable validateUniqueImei(String imei) {
+    private Completable validateUniqueImei(String imei) {
         return repository.findByImei(imei)
                 .flatMapCompletable(existing ->
-                        io.reactivex.rxjava3.core.Completable.error(
+                        Completable.error(
                                 new WalletAlreadyExistsException(
                                         "Wallet already exists with imei: " + imei
                                 )

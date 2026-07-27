@@ -15,12 +15,29 @@
     { "name": "message", "type": ["null", "string"], "default": null },
 
     { "name": "transactionId", "type": "string" },
-    { "name": "sourceWalletId", "type": "string" },
-    { "name": "targetWalletId", "type": "string" },
 
-    { "name": "sourceAccountId", "type": "string" },
-    { "name": "targetAccountId", "type": "string" },
+    {
+      "name": "sourceWalletId",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "targetWalletId",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "sourceDebitCardId",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "targetDebitCardId",
+      "type": ["null", "string"],
+      "default": null
+    },
 
-    { "name": "amount", "type": "double" }
+    { "name": "amount", "type": "double" },
+    { "name": "description", "type": "string" }
   ]
 }

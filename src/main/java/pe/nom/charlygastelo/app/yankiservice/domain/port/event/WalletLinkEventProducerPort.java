@@ -7,5 +7,5 @@ import pe.nom.charlygastelo.app.yankiservice.domain.model.WalletLink;
 
 public interface WalletLinkEventProducerPort {
     Completable publishWalletLinkedDebitCard(WalletLink walletLink, Wallet wallet);
-    Completable publishWalletUnlinkedDebitCard();
+    Completable publishWalletUnlinkedDebitCard(Wallet wallet);
 }

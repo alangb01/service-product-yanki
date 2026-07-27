@@ -17,6 +17,8 @@ public interface WalletPaymentEventMapper {
 
     @Mapping(target = "correlationId", source = "correlationId")
 
+    @Mapping(target = "customerId", source = "cmd.customerId")
+
     @Mapping(target = "sourceWalletId", source = "source.wallet.id")
     @Mapping(target = "targetWalletId", source = "target.wallet.id")
 
@@ -24,6 +26,7 @@ public interface WalletPaymentEventMapper {
     @Mapping(target = "targetDebitCardId", source = "target.link.debitCardId")
 
     @Mapping(target = "amount", source = "cmd.amount")
+    @Mapping(target = "description", source = "cmd.description")
     WalletPaymentOccurredEvent toWalletPaymentOccurredEvent(
             WalletValidationResult source,
             WalletValidationResult target,

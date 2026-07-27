@@ -6,8 +6,7 @@ import io.reactivex.rxjava3.core.Single;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import pe.nom.charlygastelo.app.yankiservice.application.command.WalletLinkCommand;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.BusinessException;
-import pe.nom.charlygastelo.app.yankiservice.domain.exception.WalletNotFoundException;
+import pe.nom.charlygastelo.app.yankiservice.domain.exception.*;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.DebitCard;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.LinkResult;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
@@ -16,6 +15,8 @@ import pe.nom.charlygastelo.app.yankiservice.domain.port.event.WalletLinkEventPr
 import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.DebitCardRepositoryPort;
 import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.WalletLinkRepositoryPort;
 import pe.nom.charlygastelo.app.yankiservice.domain.port.repository.WalletRepositoryPort;
+
+import java.util.AbstractMap;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class LinkDebitCardUseCase {
     private final WalletLinkRepositoryPort walletLinkRepository;
     private final WalletLinkEventProducerPort walletLinkedEventProducer;
     private final DebitCardRepositoryPort debitCardEventRequest;
+    private final WalletLinkRepositoryPort walletLinkRepositoryPort;
 
     public Single<LinkResult> execute(WalletLinkCommand cmd) {
         log.info("Linking debit card to wallet={} debitCard={}",
@@ -36,19 +38,33 @@ public class LinkDebitCardUseCase {
                 new WalletNotFoundException("Wallet not found: " + cmd.walletId())
             ))
             .flatMap(wallet ->
-                debitCardEventRequest.getById(cmd.debitCardId())
-                    .flatMap(debitCard ->
-                        validateDebitCard(debitCard)
-                            .andThen(Single.just(createLink(debitCard, wallet)))
-                            .flatMap(link ->
-                                walletLinkRepository.save(link)
-                                    .map(saved -> new LinkResult(saved, wallet)) // ← contexto interno
-                            )
-                    )
+                    walletLinkRepository.findByWalletId(wallet.id())
+                            .count()
+                            .map(count -> new AbstractMap.SimpleEntry<>(wallet, count))
             )
+            .flatMap(entry -> {
+                Wallet wallet = entry.getKey();
+                long linkCount = entry.getValue();
+
+                if (linkCount > 0) {
+                    return Single.error(new WalletLinkAlreadyExistException("Wallet already linked"));
+                }
+                return debitCardEventRequest.findById(cmd.debitCardId())
+                        .switchIfEmpty(Single.error(
+                                new DebitCardNotFoundException("Debit card not found: " + cmd.walletId())
+                        ))
+                        .flatMap(debitCard ->
+                                validateDebitCard(debitCard)
+                                        .andThen(Single.just(createLink(debitCard, wallet)))
+                                        .flatMap(link ->
+                                                walletLinkRepository.save(link)
+                                                        .map(saved -> new LinkResult(saved, wallet)) // ← contexto interno
+                                        )
+                        );
+            })
             .flatMap(ctx ->
                 walletLinkedEventProducer.publishWalletLinkedDebitCard(
-                    ctx.saved(),   // WalletLink
+                    ctx.link(),   // WalletLink
                     ctx.wallet()   // Wallet
                 ).andThen(Single.just(ctx))
             );

@@ -12,7 +12,7 @@ import org.springframework.web.server.WebFilter;
 
 @Configuration
 @EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
+//@EnableReactiveMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 

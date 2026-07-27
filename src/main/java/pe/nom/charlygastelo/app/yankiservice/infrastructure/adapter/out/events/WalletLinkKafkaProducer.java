@@ -38,8 +38,11 @@ public class WalletLinkKafkaProducer extends BaseEventProducer implements Wallet
     }
 
     @Override
-    public Completable publishWalletUnlinkedDebitCard() {
-        log.info("NOT IMPLEMENTED");
-        return Completable.complete();
+    public Completable publishWalletUnlinkedDebitCard(Wallet wallet) {
+        return publish(
+                walletUnlinkedDebitCardTopic,
+                wallet.id(),
+                mapper.toWalletUnlinkedDebitCardEvent(wallet)
+        );
     }
 }

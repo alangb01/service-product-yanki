@@ -12,12 +12,31 @@
 
     { "name": "correlationId", "type": "string" },
 
-    { "name": "sourceWalletId", "type": "string" },
-    { "name": "targetWalletId", "type": "string" },
+    { "name": "customerId", "type": "string" },
 
-    { "name": "sourceDebitCardId", "type": "string" },
-    { "name": "targetDebitCardId", "type": "string" },
+    {
+      "name": "sourceWalletId",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "targetWalletId",
+      "type": ["null", "string"],
+      "default": null
+    },
 
-    { "name": "amount", "type": "double" }
+    {
+      "name": "sourceDebitCardId",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "targetDebitCardId",
+      "type": ["null", "string"],
+      "default": null
+    },
+
+    { "name": "amount", "type": "double" },
+    { "name": "description", "type": "string" }
   ]
 }

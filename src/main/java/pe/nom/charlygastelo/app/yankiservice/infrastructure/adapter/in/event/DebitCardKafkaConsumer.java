@@ -4,8 +4,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import pe.nom.charlygastelo.app.shared.avro.dto.AccountResponseEvent;
-import pe.nom.charlygastelo.app.shared.avro.dto.DebitCardRequestEvent;
 import pe.nom.charlygastelo.app.shared.avro.dto.DebitCardResponseEvent;
 
 import java.util.function.Consumer;

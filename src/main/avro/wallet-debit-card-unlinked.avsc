@@ -10,7 +10,6 @@
     { "name": "source", "type": "string", "default": "yanki-service" },
 
     { "name": "walletId", "type": "string" },
-    { "name": "phone", "type": "string" },
-    { "name": "debitCardId", "type": "string" }
+    { "name": "phone", "type": "string" }
   ]
 }

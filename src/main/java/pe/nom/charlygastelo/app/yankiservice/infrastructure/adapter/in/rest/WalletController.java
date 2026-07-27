@@ -67,11 +67,11 @@ public class WalletController {
                 .toSingle();
     }
 
-    @GetMapping("/phone/{phone}")
+    @GetMapping("/by-phone/{phoneNumber}")
     public Single<ResponseEntity<WalletResponse>> getByPhone(
-            @PathVariable String phone) {
+            @PathVariable String phoneNumber) {
 
-        return getWalletUseCase.byPhone(phone)
+        return getWalletUseCase.byPhone(phoneNumber)
                 .map(wallet ->
                         ResponseEntity.ok(mapper.toResponse(wallet))
                 )
@@ -100,40 +100,44 @@ public class WalletController {
         return deleteWalletUseCase.execute(id);
     }
 
-    @PatchMapping("/{walletId}/link-debit-card")
+    @PostMapping("/{id}/link-debit-card")
     public Single<ResponseEntity<WalletResponse>> linkDebitCard(
-            @PathVariable String walletId,
+            @PathVariable String id,
             @Valid @RequestBody LinkDebitCardRequest request) {
 
-        WalletLinkCommand walletLinkCommand = new WalletLinkCommand(walletId, request.cardId());
+        WalletLinkCommand walletLinkCommand = new WalletLinkCommand(id, request.cardId());
         return linkDebitCardUseCase.execute(walletLinkCommand)
                 .map(result ->
                         ResponseEntity.ok(mapper.toResponse(result.wallet()))
                 );
     }
 
-    @PatchMapping("/{walletId}/unlink-debit-card")
+    @PostMapping("/{id}/unlink-debit-card")
     public Single<ResponseEntity<WalletResponse>> unlinkDebitCard(
-            @PathVariable String walletId) {
+            @PathVariable String id) {
 
 
-        return unlinkDebitCardUseCase.execute(walletId)
+        return unlinkDebitCardUseCase.execute(id)
                 .map(wallet ->
                         ResponseEntity.ok().build()
                 );
     }
 
-    @PostMapping("/payments/send")
-    public Completable sendPayment(
+    @PostMapping("/{id}/payments/send")
+    public Single<ResponseEntity<Void>> sendPayment(
+            @PathVariable String id,
             @Valid @RequestBody WalletPaymentRequest request) {
 
         WalletPaymentCommand paymentCmd = new WalletPaymentCommand(
+                id,
+                request.customerId(),
                 request.sourcePhone(),
                 request.targetPhone(),
                 request.amount(),
                 request.description()
             );
-        return paymentUseCase.execute(paymentCmd);
+        return paymentUseCase.execute(paymentCmd)
+                .map(result -> ResponseEntity.ok().build());
     }
 
     @GetMapping("/{id}/balance")

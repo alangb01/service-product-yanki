@@ -5,7 +5,7 @@ info:
   description: Mobile wallet management and payments - Project III.
 
 paths:
-  /yanki/wallets:
+  /wallets:
     post:
       summary: Create Yanki wallet
       description: Creates a mobile wallet without requiring the user to be a bank customer.
@@ -21,9 +21,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/YankiWallet'
+                $ref: '#/components/schemas/YankiWalletResponse'
 
-  /yanki/wallets/{id}:
+  /wallets/{id}:
     get:
       summary: Get wallet by ID
       parameters:
@@ -37,9 +37,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/YankiWallet'
+                $ref: '#/components/schemas/YankiWalletResponse'
 
-  /yanki/wallets/by-phone/{phoneNumber}:
+  /wallets/by-phone/{phoneNumber}:
     get:
       summary: Get wallet by phone number
       parameters:
@@ -53,9 +53,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/YankiWallet'
+                $ref: '#/components/schemas/YankiWalletResponse'
 
-  /yanki/wallets/{id}/payments/send:
+  /wallets/{id}/payments/send:
     post:
       summary: Send payment to another Yanki wallet
       description: Sends money using only the recipient's phone number.
@@ -74,7 +74,7 @@ paths:
         '201':
           description: Payment sent
 
-  /yanki/wallets/{id}/payments/receive:
+  /wallets/{id}/payments/receive:
     post:
       summary: Receive payment from another Yanki wallet
       description: Registers an incoming payment.
@@ -93,7 +93,7 @@ paths:
         '201':
           description: Payment received
 
-  /yanki/wallets/{id}/link-debit-card:
+  /wallets/{id}/link-debit-card:
     post:
       summary: Link Yanki wallet to a debit card
       description: Associates the wallet with a bank debit card so payments affect the main account.
@@ -114,7 +114,7 @@ paths:
 
 components:
   schemas:
-    YankiWallet:
+    YankiWalletResponse:
       type: object
       properties:
         id: { type: string }
@@ -162,4 +162,4 @@ components:
 
     DocumentType:
       type: string
-      enum: [DNI, CEX, PASSPORT]
+      enum: [DNI, RUC, PASSPORT]

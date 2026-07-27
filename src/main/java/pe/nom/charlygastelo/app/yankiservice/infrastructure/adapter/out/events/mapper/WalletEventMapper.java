@@ -82,6 +82,7 @@ public class WalletEventMapper {
                 .setVersion("1.0")
                 .setSource("yanki-service")
                 .setWalletId(value(wallet.id()))
+                .setPhone(value(wallet.phone()))
                 .build();
     }
 }

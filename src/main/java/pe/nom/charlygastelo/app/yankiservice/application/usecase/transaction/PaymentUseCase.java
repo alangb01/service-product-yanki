@@ -32,13 +32,12 @@ public class PaymentUseCase {
     private final WalletPaymentEventProducerPort paymentProducer;
     private final RequestResponseRegistry<WalletPaymentResponseEvent> registry;
 
-
-    public Completable execute(WalletPaymentCommand cmd) {
+    public Single<Transaction> execute(WalletPaymentCommand cmd) {
         return validateWallet(cmd.sourceNumber())
             .flatMap(sourceWalletValidated->validateWallet(cmd.targetNumber())
-                    .flatMap(targetWalletValidated->
-                            sendPaymentEvent(sourceWalletValidated, targetWalletValidated, cmd))
-            ).ignoreElement();
+                .flatMap(targetWalletValidated->
+                    sendPaymentEvent(sourceWalletValidated, targetWalletValidated, cmd))
+            );
     }
 
     public Single<WalletValidationResult> validateWallet(String phone) {
@@ -56,7 +55,8 @@ public class PaymentUseCase {
     private Single<Transaction> sendPaymentEvent(
             WalletValidationResult source,
             WalletValidationResult target,
-            WalletPaymentCommand cmd) {
+            WalletPaymentCommand cmd
+        ) {
 
         String correlationId = UUID.randomUUID().toString();
 
@@ -65,34 +65,34 @@ public class PaymentUseCase {
                 correlationId, cmd.amount());
 
         return paymentProducer.publishWalletPaymentOccurred(
-                    source, target, cmd, correlationId
-                )
-                .andThen(registry.register(correlationId))
-                .flatMap(response -> {
+                source, target, cmd, correlationId
+            )
+            .andThen(registry.register(correlationId))
+            .switchIfEmpty(Single.error(new RuntimeException("payment timeout")))
+            .flatMap(response -> {
+                switch (response.getStatus().toString()) {
 
-                    switch (response.getStatus().toString()) {
+                    case "FAILED":
+                        return Single.error(new BusinessException(response.getMessage().toString()));
 
-                        case "FAILED":
-                            return Single.error(new BusinessException(response.getMessage().toString()));
+                    case "TIMEOUT":
+                        return Single.error(new RuntimeException("payment timeout"));
 
-                        case "TIMEOUT":
-                            return Single.error(new RuntimeException("payment timeout"));
+                    case "SUCCESS":
+                        Transaction tx = new Transaction(
+                                response.getTransactionId().toString(),
+                                response.getSourceWalletId().toString(),
+                                response.getTargetWalletId().toString(),
+                                TransactionType.YANKI_PAYMENT,
+                                new BigDecimal(response.getAmount()),
+                                BigDecimal.ZERO,
+                                response.getDescription().toString()
+                        );
+                        return Single.just(tx);
 
-                        case "SUCCESS":
-                            Transaction tx = new Transaction(
-                                    response.getTransactionId().toString(),
-                                    response.getSourceWalletId().toString(),
-                                    response.getTargetWalletId().toString(),
-                                    TransactionType.YANKI_PAYMENT,
-                                    new BigDecimal(response.getAmount()),
-                                    BigDecimal.ZERO,
-                                    response.getMessage().toString()
-                            );
-                            return Single.just(tx);
-
-                        default:
-                            return Single.error(new RuntimeException("unknown status"));
-                    }
-                });
+                    default:
+                        return Single.error(new RuntimeException("unknown status"));
+                }
+            });
     }
 }
