@@ -3,8 +3,8 @@ package pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.out.events.
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import pe.nom.charlygastelo.app.shared.avro.dto.WalletPaymentOccurredEvent;
-import pe.nom.charlygastelo.app.yankiservice.application.command.WalletPaymentCommand;
-import pe.nom.charlygastelo.app.yankiservice.domain.model.WalletValidationResult;
+import pe.nom.charlygastelo.app.yankiservice.application.command.WalletSendCommand;
+import pe.nom.charlygastelo.app.yankiservice.domain.model.WalletValidated;
 
 @Mapper(componentModel = "spring")
 public interface WalletPaymentEventMapper {
@@ -28,9 +28,9 @@ public interface WalletPaymentEventMapper {
     @Mapping(target = "amount", source = "cmd.amount")
     @Mapping(target = "description", source = "cmd.description")
     WalletPaymentOccurredEvent toWalletPaymentOccurredEvent(
-            WalletValidationResult source,
-            WalletValidationResult target,
-            WalletPaymentCommand cmd,
+            WalletValidated source,
+            WalletValidated target,
+            WalletSendCommand cmd,
             String correlationId
     );
 }

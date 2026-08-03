@@ -10,14 +10,12 @@ import io.reactivex.rxjava3.core.Single;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import pe.nom.charlygastelo.app.yankiservice.application.command.WalletLinkCommand;
-import pe.nom.charlygastelo.app.yankiservice.application.command.WalletPaymentCommand;
+import pe.nom.charlygastelo.app.yankiservice.application.command.WalletSendCommand;
 import pe.nom.charlygastelo.app.yankiservice.application.usecase.*;
-import pe.nom.charlygastelo.app.yankiservice.application.usecase.transaction.PaymentUseCase;
+import pe.nom.charlygastelo.app.yankiservice.application.usecase.transaction.SendPaymentUseCase;
 import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
 import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.dto.*;
 import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.in.rest.mapper.WalletRestMapper;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/wallets")
@@ -32,7 +30,7 @@ public class WalletController {
     private final DeleteWalletUseCase deleteWalletUseCase;
     private final LinkDebitCardUseCase linkDebitCardUseCase;
     private final UnlinkDebitCardUseCase unlinkDebitCardUseCase;
-    private final PaymentUseCase paymentUseCase;
+    private final SendPaymentUseCase paymentUseCase;
     private final GetWalletBalanceUseCase getWalletBalanceUseCase;
     private final WalletRestMapper mapper;
 
@@ -123,15 +121,14 @@ public class WalletController {
                 );
     }
 
-    @PostMapping("/{id}/payments/send")
+    @PostMapping("/{walletId}/payments/send")
     public Single<ResponseEntity<Void>> sendPayment(
-            @PathVariable String id,
-            @Valid @RequestBody WalletPaymentRequest request) {
+            @PathVariable String walletId,
+            @Valid @RequestBody WalletSendRequest request) {
 
-        WalletPaymentCommand paymentCmd = new WalletPaymentCommand(
-                id,
+        WalletSendCommand paymentCmd = new WalletSendCommand(
+                walletId,
                 request.customerId(),
-                request.sourcePhone(),
                 request.targetPhone(),
                 request.amount(),
                 request.description()

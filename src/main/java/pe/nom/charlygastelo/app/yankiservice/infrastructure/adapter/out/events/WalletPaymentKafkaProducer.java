@@ -7,12 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import pe.nom.charlygastelo.app.yankiservice.application.command.WalletPaymentCommand;
-import pe.nom.charlygastelo.app.yankiservice.domain.model.Wallet;
-import pe.nom.charlygastelo.app.yankiservice.domain.model.WalletValidationResult;
-import pe.nom.charlygastelo.app.yankiservice.domain.port.event.WalletEventProducerPort;
+import pe.nom.charlygastelo.app.yankiservice.application.command.WalletSendCommand;
+import pe.nom.charlygastelo.app.yankiservice.domain.model.WalletValidated;
 import pe.nom.charlygastelo.app.yankiservice.domain.port.event.WalletPaymentEventProducerPort;
-import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.out.events.mapper.WalletEventMapper;
 import pe.nom.charlygastelo.app.yankiservice.infrastructure.adapter.out.events.mapper.WalletPaymentEventMapper;
 
 @Slf4j
@@ -34,9 +31,9 @@ public class WalletPaymentKafkaProducer extends BaseEventProducer implements Wal
 
     @Override
     public Completable publishWalletPaymentOccurred(
-            WalletValidationResult source,
-            WalletValidationResult target,
-            WalletPaymentCommand cmd,
+            WalletValidated source,
+            WalletValidated target,
+            WalletSendCommand cmd,
             String correlationId
         ) {
         return publish(
